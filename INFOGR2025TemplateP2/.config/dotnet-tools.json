@@ -6,7 +6,8 @@
       "version": "0.1.104",
       "commands": [
         "nvpatch"
-      ]
+      ],
+      "rollForward": false
     }
   }
 }
