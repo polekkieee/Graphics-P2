@@ -139,6 +139,26 @@ namespace Template
             // called once per frame; app logic
             var keyboard = KeyboardState;
             if (keyboard[Keys.Escape]) terminated = true;
+
+            // Camera looking around
+            if (keyboard[Keys.W]) app.worldToCamera *= Matrix4.CreateRotationX(-app.angle90degrees * (float)e.Time);
+            if (keyboard[Keys.S]) app.worldToCamera *= Matrix4.CreateRotationX(app.angle90degrees * (float)e.Time);
+            if (keyboard[Keys.A]) app.worldToCamera *= Matrix4.CreateRotationY(-app.angle90degrees * (float)e.Time);
+            if (keyboard[Keys.D]) app.worldToCamera *= Matrix4.CreateRotationY(app.angle90degrees * (float)e.Time);
+
+            if (keyboard[Keys.Q]) app.worldToCamera *= Matrix4.CreateRotationZ(-app.angle90degrees * (float)e.Time);
+            if (keyboard[Keys.E]) app.worldToCamera *= Matrix4.CreateRotationZ(app.angle90degrees * (float)e.Time);
+
+            // Camera movement
+            if (keyboard[Keys.Up]) app.worldToCamera *= Matrix4.CreateTranslation(0, 0, -5.0f * (float)e.Time);
+            if (keyboard[Keys.Down]) app.worldToCamera *= Matrix4.CreateTranslation(0, 0, 5.0f * (float)e.Time);
+            if (keyboard[Keys.Left]) app.worldToCamera *= Matrix4.CreateTranslation(5.0f * (float)e.Time, 0, 0);
+            if (keyboard[Keys.Right]) app.worldToCamera *= Matrix4.CreateTranslation(-5.0f * (float)e.Time, 0, 0);
+
+            if (keyboard[Keys.PageUp]) app.worldToCamera *= Matrix4.CreateTranslation(0, 5.0f * (float)e.Time, 0);
+            if (keyboard[Keys.PageDown]) app.worldToCamera *= Matrix4.CreateTranslation(0, -5.0f * (float)e.Time, 0);
+
+
         }
         protected override void OnRenderFrame(FrameEventArgs e)
         {

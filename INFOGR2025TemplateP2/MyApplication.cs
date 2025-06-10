@@ -17,8 +17,12 @@ namespace Template
         ScreenQuad? quad;                       // screen filling quad for post processing
         readonly bool useRenderTarget = true;   // required for post processing
 
-        SceneGraph sceneGraph = new();          // scene graph for managing objects
-        SceneNode? teapot, floor;               // scene nodes for the meshes
+        public SceneGraph sceneGraph = new();          // scene graph for managing objects
+        public SceneNode? teapot, floor;               // scene nodes for the meshes
+
+        public Matrix4 worldToCamera;
+        public Matrix4 cameraToScreen;
+        public float angle90degrees = MathF.PI / 2;
 
 
         // constructor
@@ -53,6 +57,13 @@ namespace Template
             sceneGraph.Root.AddChild(teapot);
             sceneGraph.Root.AddChild(floor);
 
+            // Camera and projection
+            worldToCamera = Matrix4.CreateTranslation(new Vector3(0, -14.5f, 0)) *
+                                    Matrix4.CreateFromAxisAngle(new Vector3(1, 0, 0), angle90degrees);
+            cameraToScreen = Matrix4.CreatePerspectiveFieldOfView(
+                MathHelper.DegreesToRadians(60.0f),
+                (float)screen.width / screen.height, 0.1f, 1000);
+
         }
 
         // tick for background surface
@@ -68,7 +79,6 @@ namespace Template
             timer.Reset();
             timer.Start();
 
-            float angle90degrees = MathF.PI / 2;
 
             // Compose object-to-world transforms for each node
             teapot.LocalTransform = Matrix4.CreateScale(0.5f) *
@@ -78,13 +88,6 @@ namespace Template
             floor.LocalTransform = Matrix4.CreateScale(4.0f) *
                                    Matrix4.CreateFromAxisAngle(new Vector3(0, 1, 0), 1) *
                                    Matrix4.CreateTranslation(0, -1.5f, 0);
-
-            // Camera and projection
-            Matrix4 worldToCamera = Matrix4.CreateTranslation(new Vector3(0, -14.5f, 0)) *
-                                    Matrix4.CreateFromAxisAngle(new Vector3(1, 0, 0), angle90degrees);
-            Matrix4 cameraToScreen = Matrix4.CreatePerspectiveFieldOfView(
-                MathHelper.DegreesToRadians(60.0f),
-                (float)screen.width / screen.height, 0.1f, 1000);
 
             // update rotation
             a += 0.001f * frameDuration;
