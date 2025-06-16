@@ -53,13 +53,27 @@ namespace Template
         }
 
         // render the mesh using the supplied shader and matrix
-        public void Render(Shader shader, Matrix4 objectToScreen, Matrix4 objectToWorld, Texture texture)
+        public void Render(Shader shader, Matrix4 objectToScreen, Matrix4 objectToWorld, Matrix4 worldToCamera, Vector3 lightPosition, Texture texture)
         {
             // on first run, prepare buffers
             Prepare();
 
             // enable shader
             GL.UseProgram(shader.programID);
+
+            // --- Set up light and camera uniforms for Phong shading ---
+            // Assume worldToCamera matrix is accessible here, otherwise pass it as parameter or compute it
+            Vector3 cameraPosition = Vector3.TransformPosition(Vector3.Zero, worldToCamera.Inverted());
+
+            int lightPosLoc = GL.GetUniformLocation(shader.programID, "lightPosition");
+            int camPosLoc = GL.GetUniformLocation(shader.programID, "cameraPosition");
+
+            GL.Uniform3(lightPosLoc, lightPosition);
+            int lightIntensityLoc = GL.GetUniformLocation(shader.programID, "lightIntensity");
+            float intensityValue = 3.0f;                                                        // light intensity
+            GL.Uniform1(lightIntensityLoc, intensityValue);
+
+            GL.Uniform3(camPosLoc, cameraPosition);
 
             // enable texture
             int textureLocation = GL.GetUniformLocation(shader.programID, "diffuseTexture");    // get the location of the shader variable
@@ -106,6 +120,7 @@ namespace Template
             // restore previous OpenGL state
             GL.UseProgram(0);
         }
+
 
         // layout of a single vertex
         [StructLayout(LayoutKind.Sequential)]

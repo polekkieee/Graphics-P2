@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Windows.Markup;
 using OpenTK.Mathematics;
 
 namespace Template
@@ -12,7 +13,7 @@ namespace Template
         readonly Stopwatch timer = new();       // timer for measuring frame duration
         Shader? shader;                         // shader to use for rendering
         Shader? postproc;                       // shader to use for post processing
-        Texture? wood;                          // texture to use for rendering
+        Texture? wood, vase;                          // texture to use for rendering
         RenderTarget? target;                   // intermediate render target
         ScreenQuad? quad;                       // screen filling quad for post processing
         readonly bool useRenderTarget = true;   // required for post processing
@@ -22,6 +23,7 @@ namespace Template
 
         public Matrix4 worldToCamera;
         public Matrix4 cameraToScreen;
+        public Vector3 lightPosition;
         public float angle90degrees = MathF.PI / 2;
 
 
@@ -45,12 +47,15 @@ namespace Template
             postproc = new Shader("../../../shaders/vs_post.glsl", "../../../shaders/fs_post.glsl");
             // load a texture
             wood = new Texture("../../../assets/wood.jpg");
+            vase = new Texture("../../../assets/vase.jpg");
+
+
             // create the render target
             if (useRenderTarget) target = new RenderTarget(screen.width, screen.height);
             quad = new ScreenQuad();
 
             // prepare the scene graph
-            teapot = new SceneNode { Mesh = teapotMesh, Texture = wood, Shader = shader };
+            teapot = new SceneNode { Mesh = teapotMesh, Texture = vase, Shader = shader };
             floor = new SceneNode { Mesh = floorMesh, Texture = wood, Shader = shader };
 
 
@@ -63,6 +68,8 @@ namespace Template
             cameraToScreen = Matrix4.CreatePerspectiveFieldOfView(
                 MathHelper.DegreesToRadians(60.0f),
                 (float)screen.width / screen.height, 0.1f, 1000);
+            
+            lightPosition = new Vector3(0, 10, 0); // position of the light source
 
         }
 
@@ -70,6 +77,7 @@ namespace Template
         public void Tick()
         {
         }
+    
 
         // tick for OpenGL rendering code
         public void RenderGL()
@@ -93,8 +101,9 @@ namespace Template
             a += 0.001f * frameDuration;
             if (a > 2 * MathF.PI) a -= 2 * MathF.PI;
 
+
             // Render the scene graph
-            sceneGraph.Render(worldToCamera, cameraToScreen, shader, wood);
+            sceneGraph.Render(worldToCamera, cameraToScreen, lightPosition, shader, wood);
         }
     }
 }

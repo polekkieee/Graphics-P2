@@ -1,16 +1,35 @@
 ﻿#version 330
- 
-// shader inputs
-in vec4 positionWorld;              // fragment position in World Space
-in vec4 normalWorld;                // fragment normal in World Space
-in vec2 uv;                         // fragment uv texture coordinates
-uniform sampler2D diffuseTexture;	// texture sampler
 
-// shader output
+in vec4 positionWorld;
+in vec4 normalWorld;
+in vec2 uv;
+
+uniform sampler2D diffuseTexture;
+uniform int useTexture;
+uniform vec3 materialColor;
+uniform vec3 lightPosition;
+uniform float lightIntensity;
+uniform vec3 cameraPosition;
+
 out vec4 outputColor;
 
-// fragment shader
 void main()
 {
-    outputColor = texture(diffuseTexture, uv) + 0.5 * normalWorld;
+    vec3 baseColor = texture(diffuseTexture, uv).rgb;
+
+    vec3 norm = normalize(normalWorld.xyz);
+    vec3 fragPos = positionWorld.xyz;
+    vec3 lightDir = normalize(lightPosition - fragPos);
+    vec3 viewDir = normalize(cameraPosition - fragPos);
+    vec3 reflectDir = reflect(-lightDir, norm);
+
+    float diff = max(dot(norm, lightDir), 0.0);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
+
+    vec3 ambient = 0.1 * baseColor;
+    vec3 diffuse = 0.7 * diff * baseColor * lightIntensity;
+    vec3 specular = 0.2 * spec * vec3(1.0) * lightIntensity;
+
+    vec3 result = ambient + diffuse + specular;
+    outputColor = vec4(result, 1.0);
 }
