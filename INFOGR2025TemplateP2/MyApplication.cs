@@ -56,20 +56,21 @@ namespace Template
 
             // prepare the scene graph
             teapot = new SceneNode { Mesh = teapotMesh, Texture = vase, Shader = shader };
-            floor = new SceneNode { Mesh = floorMesh, Texture = wood, Shader = shader };
+            floor = new SceneNode { Mesh = floorMesh, Texture = vase, Shader = shader };
 
 
             sceneGraph.Root.AddChild(teapot);
             sceneGraph.Root.AddChild(floor);
 
             // Camera and projection
-            worldToCamera = Matrix4.CreateTranslation(new Vector3(0, -14.5f, 0)) *
-                                    Matrix4.CreateFromAxisAngle(new Vector3(1, 0, 0), angle90degrees);
+            worldToCamera = Matrix4.CreateTranslation(new Vector3(18, -3f, 0)) *
+                                    Matrix4.CreateFromAxisAngle(new Vector3(1, 30, 0), angle90degrees);
             cameraToScreen = Matrix4.CreatePerspectiveFieldOfView(
                 MathHelper.DegreesToRadians(60.0f),
                 (float)screen.width / screen.height, 0.1f, 1000);
             
-            lightPosition = new Vector3(0, 10, 0); // position of the light source
+            lightPosition = new Vector3(40, 10, 0); // position of the light source
+            lightPosition = new Vector3(30, -20, 0);
 
         }
 
