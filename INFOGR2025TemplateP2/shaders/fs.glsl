@@ -5,9 +5,9 @@ in vec4 normalWorld;
 in vec2 uv;
 
 uniform sampler2D diffuseTexture;
-uniform int useTexture;
 uniform vec3 materialColor;
 uniform vec3 lightPosition;
+uniform vec3 lightColor;
 uniform float lightIntensity;
 uniform vec3 cameraPosition;
 
@@ -27,8 +27,8 @@ void main()
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
 
     vec3 ambient = 0.1 * baseColor;
-    vec3 diffuse = 0.7 * diff * baseColor * lightIntensity;
-    vec3 specular = 0.2 * spec * vec3(1.0) * lightIntensity;
+    vec3 diffuse = 0.7 * diff * baseColor * lightColor * lightIntensity;
+    vec3 specular = 0.2 * spec * lightColor * lightIntensity;
 
     vec3 result = ambient + diffuse + specular;
     outputColor = vec4(result, 1.0);
