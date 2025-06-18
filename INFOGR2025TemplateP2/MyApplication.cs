@@ -70,7 +70,6 @@ namespace Template
                 (float)screen.width / screen.height, 0.1f, 1000);
             
             lightPosition = new Vector3(40, 10, 0); // position of the light source
-            lightPosition = new Vector3(30, -20, 0);
 
         }
 
