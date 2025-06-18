@@ -23,7 +23,7 @@ namespace Template
 
         public Matrix4 worldToCamera;
         public Matrix4 cameraToScreen;
-        public Vector3 lightPosition;
+        public Light light;
         public float angle90degrees = MathF.PI / 2;
 
 
@@ -68,9 +68,9 @@ namespace Template
             cameraToScreen = Matrix4.CreatePerspectiveFieldOfView(
                 MathHelper.DegreesToRadians(60.0f),
                 (float)screen.width / screen.height, 0.1f, 1000);
-            
-            lightPosition = new Vector3(0, 10, 0); // position of the light source
 
+            // Light setup
+            light = new Light(new Vector3(5, 10, 0), new Vector3(1, 1, 1), 1.2f);
         }
 
         // tick for background surface
@@ -103,7 +103,7 @@ namespace Template
 
 
             // Render the scene graph
-            sceneGraph.Render(worldToCamera, cameraToScreen, lightPosition, shader, wood);
+            sceneGraph.Render(worldToCamera, cameraToScreen, light, shader, wood);
         }
     }
 }
