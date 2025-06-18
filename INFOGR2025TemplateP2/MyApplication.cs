@@ -77,7 +77,7 @@ namespace Template
         public void Tick()
         {
         }
-    
+
 
         // tick for OpenGL rendering code
         public void RenderGL()
@@ -87,8 +87,11 @@ namespace Template
             timer.Reset();
             timer.Start();
 
+            // update rotation
+            a += 0.001f * frameDuration;
+            if (a > 2 * MathF.PI) a -= 2 * MathF.PI;
 
-            // Compose object-to-world transforms for each node
+            // Compose object-to-world transforms
             teapot.LocalTransform = Matrix4.CreateScale(0.5f) *
                                     Matrix4.CreateFromAxisAngle(new Vector3(0, 1, 0), a) *
                                     Matrix4.CreateTranslation(0, 0, 0);
@@ -97,13 +100,35 @@ namespace Template
                                    Matrix4.CreateFromAxisAngle(new Vector3(0, 1, 0), 1) *
                                    Matrix4.CreateTranslation(0, -1.5f, 0);
 
-            // update rotation
-            a += 0.001f * frameDuration;
-            if (a > 2 * MathF.PI) a -= 2 * MathF.PI;
+            if (useRenderTarget && target != null && quad != null)
+            {
+                // Bind render target (framebuffer)
+                target.Bind();
 
+                // Render scene graph to render target
+                if (shader != null && wood != null)
+                {
+                    sceneGraph.Render(worldToCamera, cameraToScreen, light, shader, wood);
+                }
 
-            // Render the scene graph
-            sceneGraph.Render(worldToCamera, cameraToScreen, light, shader, wood);
+                // Unbind render target to switch back to screen
+                target.Unbind();
+
+                // Apply post-processing shader to quad using the rendered texture
+                if (postproc != null)
+                {
+                    quad.Render(postproc, target.GetTextureID());
+                }
+            }
+            else
+            {
+                // Render scene graph directly to screen
+                if (shader != null && wood != null)
+                {
+                    sceneGraph.Render(worldToCamera, cameraToScreen, light, shader, wood);
+                }
+            }
         }
+
     }
 }
