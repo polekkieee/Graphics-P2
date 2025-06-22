@@ -8,7 +8,7 @@ namespace Template
     {
         // member variables
         public Surface screen;                  // background surface for printing etc.
-        Mesh? teapotMesh, floorMesh, catMesh;            // meshes to draw using OpenGL
+        Mesh? teapotMesh, floorMesh;            // meshes to draw using OpenGL
         float a = 0;                            // teapot rotation angle
         readonly Stopwatch timer = new();       // timer for measuring frame duration
         Shader? shader;                         // shader to use for rendering
@@ -19,11 +19,11 @@ namespace Template
         readonly bool useRenderTarget = true;   // required for post processing
 
         public SceneGraph sceneGraph = new();          // scene graph for managing objects
-        public SceneNode? teapot, floor, cat, cat2;               // scene nodes for the meshes
+        public SceneNode? teapot, floor;               // scene nodes for the meshes
 
         public Matrix4 worldToCamera;
         public Matrix4 cameraToScreen;
-        public Vector3 lightPosition;
+        public Light light;
         public float angle90degrees = MathF.PI / 2;
 
 
@@ -38,7 +38,6 @@ namespace Template
             // load teapot
             teapotMesh = new Mesh("../../../assets/teapot.obj");
             floorMesh = new Mesh("../../../assets/floor.obj");
-            catMesh = new Mesh("../../../assets/cat.obj");
 
             // initialize stopwatch
             timer.Reset();
@@ -58,14 +57,10 @@ namespace Template
             // prepare the scene graph
             teapot = new SceneNode { Mesh = teapotMesh, Texture = vase, Shader = shader };
             floor = new SceneNode { Mesh = floorMesh, Texture = wood, Shader = shader };
-            cat = new SceneNode { Mesh = catMesh, Texture = vase, Shader = shader };
-            cat2 = new SceneNode { Mesh = catMesh, Texture = wood, Shader = shader };
 
 
             sceneGraph.Root.AddChild(teapot);
             sceneGraph.Root.AddChild(floor);
-            sceneGraph.Root.AddChild(cat);
-            cat.AddChild(cat2);
 
             // Camera and projection
             worldToCamera = Matrix4.CreateTranslation(new Vector3(0, -14.5f, 0)) *
@@ -73,16 +68,16 @@ namespace Template
             cameraToScreen = Matrix4.CreatePerspectiveFieldOfView(
                 MathHelper.DegreesToRadians(60.0f),
                 (float)screen.width / screen.height, 0.1f, 1000);
-            
-            lightPosition = new Vector3(0, 10, 0); // position of the light source
 
+            // Light setup
+            light = new Light(new Vector3(5, 10, 0), new Vector3(1, 1, 1), 1.2f);
         }
 
         // tick for background surface
         public void Tick()
         {
         }
-    
+
 
         // tick for OpenGL rendering code
         public void RenderGL()
@@ -92,8 +87,11 @@ namespace Template
             timer.Reset();
             timer.Start();
 
+            // update rotation
+            a += 0.001f * frameDuration;
+            if (a > 2 * MathF.PI) a -= 2 * MathF.PI;
 
-            // Compose object-to-world transforms for each node
+            // Compose object-to-world transforms
             teapot.LocalTransform = Matrix4.CreateScale(0.5f) *
                                     Matrix4.CreateFromAxisAngle(new Vector3(0, 1, 0), a) *
                                     Matrix4.CreateTranslation(0, 0, 0);
@@ -102,22 +100,35 @@ namespace Template
                                    Matrix4.CreateFromAxisAngle(new Vector3(0, 1, 0), 1) *
                                    Matrix4.CreateTranslation(0, -1.5f, 0);
 
-            cat.LocalTransform = Matrix4.CreateScale(0.02f) *
-                                   Matrix4.CreateFromAxisAngle(new Vector3(0, 1, 0), -a * 2) *
-                                   Matrix4.CreateTranslation(0, -1.5f, MathF.Sin(a)*10);
+            if (useRenderTarget && target != null && quad != null)
+            {
+                // Bind render target (framebuffer)
+                target.Bind();
 
-            cat2.LocalTransform = Matrix4.CreateScale(0.5f) *
-                                   Matrix4.CreateFromAxisAngle(new Vector3(0, 1, 0), a * 2) *
-                                   Matrix4.CreateTranslation(0, 2f, MathF.Sin(-a) * 100);
+                // Render scene graph to render target
+                if (shader != null && wood != null)
+                {
+                    sceneGraph.Render(worldToCamera, cameraToScreen, light, shader, wood);
+                }
 
-            // update rotation
-            a += 0.001f * frameDuration;
-            if (a > 2 * MathF.PI) a -= 2 * MathF.PI;
+                // Unbind render target to switch back to screen
+                target.Unbind();
 
-
-
-            // Render the scene graph
-            sceneGraph.Render(worldToCamera, cameraToScreen, lightPosition, shader, wood);
+                // Apply post-processing shader to quad using the rendered texture
+                if (postproc != null)
+                {
+                    quad.Render(postproc, target.GetTextureID());
+                }
+            }
+            else
+            {
+                // Render scene graph directly to screen
+                if (shader != null && wood != null)
+                {
+                    sceneGraph.Render(worldToCamera, cameraToScreen, light, shader, wood);
+                }
+            }
         }
+
     }
 }
