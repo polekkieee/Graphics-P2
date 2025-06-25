@@ -116,9 +116,18 @@ namespace Template
             a += 0.001f * frameDuration;
             if (a > 2 * MathF.PI) a -= 2 * MathF.PI;
 
+            //apply vignetting and chromatic aberration
+            target.Bind();
+
 
             // Render the scene graph
             sceneGraph.Render(worldToCamera, cameraToScreen, lights, spotLights, shader, wood);
+
+            target.Unbind();
+
+            postproc.Use();
+            quad.Render(postproc, target.GetTexture());
+
         }
     }
 }

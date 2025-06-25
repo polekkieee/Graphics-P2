@@ -52,6 +52,11 @@ namespace Template
             // return to regular framebuffer
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         }
+        public int GetTexture()
+        {
+            return colorTexture; 
+        }
+
         private bool CheckFBOStatus()
         {
             switch (GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer))
