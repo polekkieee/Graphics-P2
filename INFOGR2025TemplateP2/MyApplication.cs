@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Windows.Markup;
 using INFOGR2025TemplateP2;
 using OpenTK.Mathematics;
+using OpenTK.Graphics.OpenGL;
 
 namespace Template
 {
@@ -126,8 +127,13 @@ namespace Template
             target.Unbind();
 
             postproc.Use();
-            quad.Render(postproc, target.GetTexture());
 
+            int vignetteLoc = GL.GetUniformLocation(postproc.programID, "vignetteStrength");
+            int chromAbLoc = GL.GetUniformLocation(postproc.programID, "chromAbOffset");
+
+            GL.Uniform1(vignetteLoc, 1.5f);        
+            GL.Uniform1(chromAbLoc, 0.003f);     
+            quad.Render(postproc, target.GetTexture());
         }
     }
 }
