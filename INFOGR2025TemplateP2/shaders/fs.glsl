@@ -13,6 +13,13 @@ uniform vec3 lightPositions[MAX_LIGHTS];
 uniform vec3 lightColors[MAX_LIGHTS];
 uniform float lightIntensities[MAX_LIGHTS];
 
+#define MAX_SPOTLIGHTS 4
+uniform vec3 spotPositions[MAX_SPOTLIGHTS];
+uniform vec3 spotDirections[MAX_SPOTLIGHTS];
+uniform float spotAngles[MAX_SPOTLIGHTS];
+uniform vec3 spotColors[MAX_SPOTLIGHTS];
+uniform float spotIntensities[MAX_SPOTLIGHTS];
+
 out vec4 outputColor;
 
 void main()
@@ -23,8 +30,12 @@ void main()
     vec3 viewDir = normalize(cameraPosition - fragPos);
 
     vec3 result = vec3(0.0);
-    vec3 ambient = 0.1 * baseColor;
 
+    // Ambient light
+    vec3 ambient = 0.1 * baseColor;
+    result += ambient;
+
+    // Point lights
     for (int i = 0; i < MAX_LIGHTS; ++i)
     {
         vec3 lightDir = normalize(lightPositions[i] - fragPos);
@@ -39,5 +50,26 @@ void main()
         result += diffuse + specular;
     }
 
-    outputColor = vec4(ambient + result, 1.0);
+    // Spotlights
+    for (int i = 0; i < MAX_SPOTLIGHTS; ++i)
+    {
+        vec3 lightToFrag = fragPos - spotPositions[i];
+        vec3 lightDir = normalize(-lightToFrag);
+        float theta = dot(lightDir, normalize(spotDirections[i]));
+
+        if (theta > spotAngles[i])  // hard cutoff
+        {
+            float diff = max(dot(norm, lightDir), 0.0);
+            vec3 reflectDir = reflect(-lightDir, norm);
+            float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
+
+            float attenuation = smoothstep(spotAngles[i], 1.0, theta);
+            vec3 diffuse = diff * baseColor * spotColors[i] * spotIntensities[i] * attenuation;
+            vec3 specular = spec * spotColors[i] * spotIntensities[i] * attenuation;
+
+            result += diffuse + specular;
+        }
+    }
+
+    outputColor = vec4(result, 1.0);
 }

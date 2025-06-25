@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Windows.Markup;
+using INFOGR2025TemplateP2;
 using OpenTK.Mathematics;
 
 namespace Template
@@ -26,6 +27,7 @@ namespace Template
         public float angle90degrees = MathF.PI / 2;
 
         public List<Light> lights = new List<Light>();
+        public List<SpotLight> spotLights = new List<SpotLight>();
 
 
         // constructor
@@ -71,11 +73,19 @@ namespace Template
                 (float)screen.width / screen.height, 0.1f, 1000);
 
             // Light setup
-            // Define multiple lights
-            lights.Add(new Light(new Vector3(-5, 10, 0), new Vector3(1, 1, 1), 1.2f));
-            lights.Add(new Light(new Vector3(5, 10, 0), new Vector3(1, 0, 0), 1.0f));
+            lights.Add(new Light(new Vector3(5, 10, 0), new Vector3(1, 1, 1), 1.2f));
+            lights.Add(new Light(new Vector3(-5, 10, 0), new Vector3(1, 0, 0), 1.0f));
             lights.Add(new Light(new Vector3(0, 10, 5), new Vector3(0, 1, 0), 0.8f));
             lights.Add(new Light(new Vector3(0, 10, -5), new Vector3(0, 0, 1), 0.8f));
+
+            //spotlights
+            spotLights.Add(new SpotLight(
+                new Vector3(0, 10, 10),
+                new Vector3(0, -1, -1),
+                MathHelper.DegreesToRadians(20),
+                new Vector3(1, 1, 1),
+                1.5f
+            ));
         }
 
         // tick for background surface
@@ -108,7 +118,7 @@ namespace Template
 
 
             // Render the scene graph
-            sceneGraph.Render(worldToCamera, cameraToScreen, lights, shader, wood);
+            sceneGraph.Render(worldToCamera, cameraToScreen, lights, spotLights, shader, wood);
         }
     }
 }

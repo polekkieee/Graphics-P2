@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using INFOGR2025TemplateP2;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 
@@ -53,7 +54,7 @@ namespace Template
         }
 
         // render the mesh using the supplied shader and matrix
-        public void Render(Shader shader, Matrix4 objectToScreen, Matrix4 objectToWorld, Matrix4 worldToCamera, List<Light> light, Texture texture)
+        public void Render(Shader shader, Matrix4 objectToScreen, Matrix4 objectToWorld, Matrix4 worldToCamera, List<Light> light, List<SpotLight> spotLights, Texture texture)
         {
             // on first run, prepare buffers
             Prepare();
@@ -66,6 +67,7 @@ namespace Template
             int camPosLoc = GL.GetUniformLocation(shader.programID, "cameraPosition");
             GL.Uniform3(camPosLoc, cameraPosition);
 
+            //enable lights
             int maxLights = 4;
             for (int i = 0; i < Math.Min(light.Count, maxLights); i++)
             {
@@ -81,6 +83,20 @@ namespace Template
                 if (colLoc >= 0) GL.Uniform3(colLoc, light[i].Color);
                 if (intLoc >= 0) GL.Uniform1(intLoc, light[i].Intensity);
             }
+
+            //enables spotlights
+            int maxSpots = 4;
+            for (int i = 0; i < Math.Min(spotLights.Count, maxSpots); i++)
+            {
+                SpotLight spot = spotLights[i];
+
+                GL.Uniform3(GL.GetUniformLocation(shader.programID, $"spotPositions[{i}]"), spot.Position);
+                GL.Uniform3(GL.GetUniformLocation(shader.programID, $"spotDirections[{i}]"), spot.Direction);
+                GL.Uniform1(GL.GetUniformLocation(shader.programID, $"spotAngles[{i}]"), MathF.Cos(spot.CutoffAngle));
+                GL.Uniform3(GL.GetUniformLocation(shader.programID, $"spotColors[{i}]"), spot.Color);
+                GL.Uniform1(GL.GetUniformLocation(shader.programID, $"spotIntensities[{i}]"), spot.Intensity);
+            }
+
 
             // enable texture
             int textureLocation = GL.GetUniformLocation(shader.programID, "diffuseTexture");    // get the location of the shader variable

@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using INFOGR2025TemplateP2;
+using OpenTK.Mathematics;
 using System.Collections.Generic;
 
 namespace Template
@@ -12,7 +13,7 @@ namespace Template
         public Matrix4 LocalTransform { get; set; } = Matrix4.Identity;
         public List<SceneNode> Children { get; private set; } = new List<SceneNode>();
 
-        public void Render(Matrix4 parentTransform, Matrix4 worldToCamera, Matrix4 cameraToScreen, List<Light> lights, Shader defaultShader, Texture defaultTexture)
+        public void Render(Matrix4 parentTransform, Matrix4 worldToCamera, Matrix4 cameraToScreen, List<Light> lights, List<SpotLight> spotLights,Shader defaultShader, Texture defaultTexture)
         {
             // Combine the parent's world transform with this node's local transform
             // to get the final world transform for this node.
@@ -31,14 +32,14 @@ namespace Template
                 Matrix4 objectToScreen = objectToWorld * worldToCamera * cameraToScreen;
 
                 // Render the mesh with the calculated transformations and materials.
-                Mesh.Render(shaderToUse, objectToScreen, objectToWorld, worldToCamera, lights, textureToUse);
+                Mesh.Render(shaderToUse, objectToScreen, objectToWorld, worldToCamera, lights, spotLights, textureToUse);
             }
 
             // Recursively render all child nodes.
             // Pass down this node's world transform as the parent transform for its children.
             foreach (var child in Children)
             {
-                child.Render(worldTransform, worldToCamera, cameraToScreen, lights, defaultShader, defaultTexture);
+                child.Render(worldTransform, worldToCamera, cameraToScreen, lights, spotLights, defaultShader, defaultTexture);
             }
         }
 
