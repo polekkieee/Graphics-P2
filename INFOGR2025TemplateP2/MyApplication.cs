@@ -11,7 +11,7 @@ namespace Template
         // member variables
         public Surface screen;                  // background surface for printing etc.
         Mesh? teapotMesh, floorMesh, teacupMesh, gorillaMesh, giraffeMesh, pandaMesh, bearMesh; // meshes to draw using OpenGL
-        float a = 0, b = 0, c = 0, d = 0;              // teapot rotation angle
+        float a = 0, b = 0, c = 0, d = 0;       // teapot rotation angle
         readonly Stopwatch timer = new();       // timer for measuring frame duration
         Shader? shader;                         // shader to use for rendering
         Shader? postproc;                       // shader to use for post processing
@@ -57,8 +57,7 @@ namespace Template
             postproc = new Shader("../../../shaders/vs_post.glsl", "../../../shaders/fs_post.glsl");
             // load a texture
             wood = new Texture("../../../assets/textures/wood.jpg");
-            vase = new Texture("../../../assets/textures/vase.jpg");
-            cat_text = new Texture("../../../assets/textures/cat.png");
+            vase = new Texture("../../../assets/textures/vase.jpg");        
             gorilla_text = new Texture("../../../assets/textures/gorilla.png");
             giraffe_text = new Texture("../../../assets/textures/giraffe.png");
             panda_text = new Texture("../../../assets/textures/panda.png");               
