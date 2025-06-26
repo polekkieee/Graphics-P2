@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using System.Windows.Markup;
+using INFOGR2025TemplateP2;
 using OpenTK.Mathematics;
+using OpenTK.Graphics.OpenGL;
 
 namespace Template
 {
@@ -23,8 +25,10 @@ namespace Template
 
         public Matrix4 worldToCamera;
         public Matrix4 cameraToScreen;
-        public Light light;
         public float angle90degrees = MathF.PI / 2;
+
+        public List<Light> lights = new List<Light>();
+        public List<SpotLight> spotLights = new List<SpotLight>();
 
 
         // constructor
@@ -69,21 +73,33 @@ namespace Template
             cat.AddChild(cat2);
 
             // Camera and projection
-            worldToCamera = Matrix4.CreateTranslation(new Vector3(30, -3, 0)) *
+            worldToCamera = Matrix4.CreateTranslation(new Vector3(18, -3f, 0)) *
                                     Matrix4.CreateFromAxisAngle(new Vector3(1, 30, 0), angle90degrees);
             cameraToScreen = Matrix4.CreatePerspectiveFieldOfView(
                 MathHelper.DegreesToRadians(60.0f),
                 (float)screen.width / screen.height, 0.1f, 1000);
 
             // Light setup
-            light = new Light(new Vector3(5, 10, 0), new Vector3(1, 1, 1), 1.2f);
+            lights.Add(new Light(new Vector3(5, 10, 0), new Vector3(1, 1, 1), 1.2f));
+            lights.Add(new Light(new Vector3(-5, 10, 0), new Vector3(1, 0, 0), 1.0f));
+            lights.Add(new Light(new Vector3(0, 10, 5), new Vector3(0, 1, 0), 0.8f));
+            lights.Add(new Light(new Vector3(0, 10, -5), new Vector3(0, 0, 1), 0.8f));
+
+            //spotlights
+            spotLights.Add(new SpotLight(
+                new Vector3(0, 10, 10),
+                new Vector3(0, -1, -1),
+                MathHelper.DegreesToRadians(20),
+                new Vector3(1, 1, 1),
+                1.5f
+            ));
         }
 
         // tick for background surface
         public void Tick()
         {
         }
-
+    
 
         // tick for OpenGL rendering code
         public void RenderGL()
@@ -93,11 +109,8 @@ namespace Template
             timer.Reset();
             timer.Start();
 
-            // update rotation
-            a += 0.001f * frameDuration;
-            if (a > 2 * MathF.PI) a -= 2 * MathF.PI;
 
-            // Compose object-to-world transforms
+            // Compose object-to-world transforms for each node
             teapot.LocalTransform = Matrix4.CreateScale(0.5f) *
                                     Matrix4.CreateFromAxisAngle(new Vector3(0, 1, 0), a) *
                                     Matrix4.CreateTranslation(0, 0, 0);
@@ -113,35 +126,27 @@ namespace Template
                                    Matrix4.CreateFromAxisAngle(new Vector3(0, 1, 0), a * 2) *
                                    Matrix4.CreateTranslation(0, 2f, MathF.Sin(-a) * 100);
 
-            if (useRenderTarget && target != null && quad != null)
-            {
-                // Bind render target (framebuffer)
-                target.Bind();
+            // update rotation
+            a += 0.001f * frameDuration;
+            if (a > 2 * MathF.PI) a -= 2 * MathF.PI;
 
-                // Render scene graph to render target
-                if (shader != null && wood != null)
-                {
-                    sceneGraph.Render(worldToCamera, cameraToScreen, light, shader, wood);
-                }
+            //apply vignetting and chromatic aberration
+            target.Bind();
 
-                // Unbind render target to switch back to screen
-                target.Unbind();
 
-                // Apply post-processing shader to quad using the rendered texture
-                if (postproc != null)
-                {
-                    quad.Render(postproc, target.GetTextureID());
-                }
-            }
-            else
-            {
-                // Render scene graph directly to screen
-                if (shader != null && wood != null)
-                {
-                    sceneGraph.Render(worldToCamera, cameraToScreen, light, shader, wood);
-                }
-            }
+            // Render the scene graph
+            sceneGraph.Render(worldToCamera, cameraToScreen, lights, spotLights, shader, wood);
+
+            target.Unbind();
+
+            postproc.Use();
+
+            int vignetteLoc = GL.GetUniformLocation(postproc.programID, "vignetteStrength");
+            int chromAbLoc = GL.GetUniformLocation(postproc.programID, "chromAbOffset");
+
+            GL.Uniform1(vignetteLoc, 1.5f);        
+            GL.Uniform1(chromAbLoc, 0.003f);     
+            quad.Render(postproc, target.GetTexture());
         }
-
     }
 }
