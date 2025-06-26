@@ -125,7 +125,7 @@ namespace Template
             base.OnResize(e);
             // called upon window resize. Note: does not change the size of the pixel buffer.
             int retinaScale = isMac ? 2 : 1; // this code assumes all Macs have retina displays
-            GL.Viewport(0, 0, retinaScale * e.Width, retinaScale * e.Height);
+            GL.Viewport(0,0, retinaScale * e.Width, retinaScale * e.Height);
             if (allowPrehistoricOpenGL)
             {
                 GL.MatrixMode(MatrixMode.Projection);

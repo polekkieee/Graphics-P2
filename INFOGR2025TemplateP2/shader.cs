@@ -46,5 +46,9 @@ namespace Template
             string infoLog = GL.GetShaderInfoLog(ID);
             if (infoLog.Length != 0) Console.WriteLine(infoLog);
         }
+        public void Use()
+        {
+            GL.UseProgram(programID);
+        }
     }
 }

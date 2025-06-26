@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using INFOGR2025TemplateP2;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 
@@ -53,7 +54,7 @@ namespace Template
         }
 
         // render the mesh using the supplied shader and matrix
-        public void Render(Shader shader, Matrix4 objectToScreen, Matrix4 objectToWorld, Matrix4 worldToCamera, Light light, Texture texture)
+        public void Render(Shader shader, Matrix4 objectToScreen, Matrix4 objectToWorld, Matrix4 worldToCamera, List<Light> light, List<SpotLight> spotLights, Texture texture)
         {
             // on first run, prepare buffers
             Prepare();
@@ -63,16 +64,39 @@ namespace Template
 
             Vector3 cameraPosition = Vector3.TransformPosition(Vector3.Zero, worldToCamera.Inverted());
 
-            int lightPosLoc = GL.GetUniformLocation(shader.programID, "lightPosition");
-            int lightColorLoc = GL.GetUniformLocation(shader.programID, "lightColor");
-            int lightIntensityLoc = GL.GetUniformLocation(shader.programID, "lightIntensity");
             int camPosLoc = GL.GetUniformLocation(shader.programID, "cameraPosition");
-            
-
-            GL.Uniform3(lightPosLoc, light.Position);
-            GL.Uniform1(lightIntensityLoc, light.Intensity);
-            GL.Uniform3(lightColorLoc, light.Color);
             GL.Uniform3(camPosLoc, cameraPosition);
+
+            //enable lights
+            int maxLights = 4;
+            for (int i = 0; i < Math.Min(light.Count, maxLights); i++)
+            {
+                string posName = $"lightPositions[{i}]";
+                string colName = $"lightColors[{i}]";
+                string intName = $"lightIntensities[{i}]";
+
+                int posLoc = GL.GetUniformLocation(shader.programID, posName);
+                int colLoc = GL.GetUniformLocation(shader.programID, colName);
+                int intLoc = GL.GetUniformLocation(shader.programID, intName);
+
+                if (posLoc >= 0) GL.Uniform3(posLoc, light[i].Position);
+                if (colLoc >= 0) GL.Uniform3(colLoc, light[i].Color);
+                if (intLoc >= 0) GL.Uniform1(intLoc, light[i].Intensity);
+            }
+
+            //enables spotlights
+            int maxSpots = 4;
+            for (int i = 0; i < Math.Min(spotLights.Count, maxSpots); i++)
+            {
+                SpotLight spot = spotLights[i];
+
+                GL.Uniform3(GL.GetUniformLocation(shader.programID, $"spotPositions[{i}]"), spot.Position);
+                GL.Uniform3(GL.GetUniformLocation(shader.programID, $"spotDirections[{i}]"), spot.Direction);
+                GL.Uniform1(GL.GetUniformLocation(shader.programID, $"spotAngles[{i}]"), MathF.Cos(spot.CutoffAngle));
+                GL.Uniform3(GL.GetUniformLocation(shader.programID, $"spotColors[{i}]"), spot.Color);
+                GL.Uniform1(GL.GetUniformLocation(shader.programID, $"spotIntensities[{i}]"), spot.Intensity);
+            }
+
 
             // enable texture
             int textureLocation = GL.GetUniformLocation(shader.programID, "diffuseTexture");    // get the location of the shader variable

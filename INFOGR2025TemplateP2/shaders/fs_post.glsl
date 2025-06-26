@@ -1,27 +1,27 @@
 #version 330
 
 in vec2 uv;
-in vec2 positionFromBottomLeft;
-uniform sampler2D pixels;
+out vec4 fragColor;
 
-out vec3 outputColor;
+uniform sampler2D screenTexture;
+uniform float vignetteStrength = 1.5;
+uniform float chromAbOffset = 0.003;
 
 void main()
 {
-    float aberrationStrength = 0.008; 
-    float dist = distance(uv, vec2(0.5, 0.5));
-    vec2 offset = (uv - vec2(0.5)) * aberrationStrength;
+    vec2 center = vec2(0.5, 0.5);
+    float dist = distance(uv, center);
 
-    float r = texture(pixels, uv + offset).r;
-    float g = texture(pixels, uv).g;
-    float b = texture(pixels, uv - offset).b;
-    vec3 color = vec3(r, g, b);
+    float vignette = 1.0 - smoothstep(0.4, 1.0, dist * vignetteStrength);
 
-    float vignette = smoothstep(0.75, 0.5, dist);
-    color *= vignette;
+    vec2 offset = normalize(uv - center) * chromAbOffset * dist;
 
-    float scanline = 0.8 + 0.2 * sin(uv.y * 1200.0); 
-    color *= scanline;
+    vec3 col;
+    col.r = texture(screenTexture, uv + offset).r;
+    col.g = texture(screenTexture, uv).g;
+    col.b = texture(screenTexture, uv - offset).b;
 
-    outputColor = color;
+    col *= vignette;
+
+    fragColor = vec4(col, 1.0);
 }
