@@ -40,7 +40,7 @@ namespace Template
         public OpenTKApp()
             : base(GameWindowSettings.Default, new NativeWindowSettings()
             {
-                ClientSize = new Vector2i(640, 360),
+                ClientSize = new Vector2i(1280, 720),
                 Profile = (allowPrehistoricOpenGL && !isMac) ? ContextProfile.Compatability : ContextProfile.Core,
                 Flags = (isMac ? ContextFlags.Default : ContextFlags.Debug)
                     | ((allowPrehistoricOpenGL && !isMac) ? ContextFlags.Default : ContextFlags.ForwardCompatible),
