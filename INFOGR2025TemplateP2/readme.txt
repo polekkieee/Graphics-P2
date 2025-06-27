@@ -7,7 +7,7 @@ Tick the boxes below for the implemented features. Add a brief note only if nece
 
 Formalities:
 [x] This readme.txt
-[ ] Cleaned (no obj/bin folders)
+[x] Cleaned (no obj/bin folders)
 [x] Demonstration scene(s) with all implemented features
 [ ] (Optional) Screenshots: make it clear which feature is demonstrated in which screenshot
 
@@ -36,4 +36,22 @@ Bonus features implemented:
 [ ] ...
 
 Notes:
-...
+source used for the chromatic aberration and vignetting; https://github.com/kylemcdonald/ofxCameraFilter
+source used for the start up of the scene graph structure; https://openai.com/chatgpt/overview/
+source used for the textures of the objects; https://gctrader.com
+source used for the spotlights feature; https://github.com/opentk/LearnOpenTK/blob/master/Chapter2/5-LightCasters-Spotlight/Shaders/lighting.frag
+
+The controls of our demo work with the aswdqe keys and the arrow keys. 
+The W rotates around the x-axis, pitched up
+The S rotates around the x-axis, pitched down
+The A rotates around the y-axis, yaws left
+The D rotates around the y-axis, yaws right
+The Q rotates around the z-axis, rolls counter-clockwise
+The E rotates around the z-axis, rolls clockwise
+
+The Arrow Up moves forward (along z)
+The Arrow Down moves backwards (along z)
+The Arrow Left straves right (along x)
+The Arrow Right straves left (along x)
+Page Up moves up (along y)
+Page Down moves down (along y)

@@ -15,6 +15,7 @@ namespace INFOGR2025TemplateP2
         public Vector3 Color;
         public float Intensity;
 
+        //spotlight constructor
         public SpotLight(Vector3 pos, Vector3 dir, float cutoffAngle, Vector3 color, float intensity)
         {
             Position = pos;
